@@ -1,0 +1,50 @@
+[project]
+name = "pettingzoo-coup"
+version = "0.1"
+description = "Coup multi-agent environment as PettingZoo AEC API"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Ivo Maceira", email = "ivomaceira@gmail.com" }]
+dependencies = ["pettingzoo>=1.25.0"]
+
+[project.optional-dependencies]
+dev = ["ruff"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C4",
+  "E",
+  "ERA",
+  "F",
+  "I",
+  "NPY201",
+  "PIE",
+  "PTH",
+  "RET",
+  "RUF",
+  "S",
+  "SIM",
+  "T20",
+  "UP",
+  "W",
+]
+
+ignore = ["B905", "D203", "D213", "E501", "RUF012", "S101", "T201"]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
