@@ -1,0 +1,5 @@
+uv.lock
+*.egg-info
+build/
+*.pdf
+*.png
