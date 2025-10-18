@@ -1,0 +1,78 @@
+[project]
+name = "coup-env"
+version = "0.1"
+description = "Coup multi-agent environment as PettingZoo API"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Ivo Maceira", email = "ivomaceira@gmail.com" }]
+dependencies = ["pettingzoo>=1.25.0"]
+
+[project.optional-dependencies]
+dev = ["ruff", "mypy", "pytest", "pytest-cov"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+  "A",      # flake8-builtins (prevent shadowing Python built-ins)
+  "ARG",    # flake8-unused-arguments (detect unused function arguments)
+  "B",      # flake8-bugbear (common logic bugs, bad practices)
+  "C4",     # flake8-comprehensions (improve comprehension efficiency)
+  "E",      # pycodestyle errors
+  "ERA",    # eradicate (remove commented-out code)
+  "F",      # pyflakes (undefined names, unused imports)
+  "I",      # isort (import sorting)
+  "NPY201", # numpy 2.0 migration rules
+  "PIE",    # flake8-pie (misc correctness and performance improvements)
+  "PTH",    # flake8-use-pathlib (prefer pathlib over os.path)
+  "RET",    # flake8-return (consistent return statements)
+  "RUF",    # ruff-specific rules (extra correctness and consistency)
+  "S",      # flake8-bandit (basic security checks)
+  "SIM",    # flake8-simplify (simpler Pythonic constructs)
+  "T20",    # flake8-print (disallow print statements)
+  "UP",     # pyupgrade (modernize syntax)
+  "W",      # pycodestyle warnings
+]
+
+ignore = [
+  "B905",   # flake8-bugbear: zip(strict=True) enforcement
+  "D203",   # pydocstyle: conflicts with D211 (one-blank-line-before-class)
+  "D213",   # pydocstyle: conflicts with D212 (multi-line docstring summary)
+  "E501",   # pycodestyle: line length
+  "RUF012", # flake8-bugbear: zip(strict=True) enforcement
+  "S101",   # bandit: allows assert statements
+  "T201",   # flake8-print: allow print()
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+# plugins = ["pydantic.mypy", "numpy.mypy_plugin"]
+strict = true
+disallow_any_unimported = true
+
+[tool.coverage.run]
+concurrency = ["thread"]
+omit = ["tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+]
