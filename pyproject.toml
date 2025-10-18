@@ -1,0 +1,72 @@
+[project]
+name = "coup-env"
+version = "0.1"
+description = "Coup multi-agent environment as PettingZoo API"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "Ivo Maceira", email = "ivomaceira@gmail.com" }
+]
+dependencies = [
+    "gymnasium>=1.2.1",
+    "pettingzoo>=1.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "uv",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "C4",     # flake8-comprehensions
+    "PTH",    # flake8-use-pathlib
+    "NPY201", # numpy 2.0 rules
+    "RET",    # flake8-return
+]
+ignore = ["D203", "D213"]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+# plugins = ["pydantic.mypy", "numpy.mypy_plugin"]
+strict = true
+disallow_any_unimported = true
+
+[tool.coverage.run]
+concurrency = ["thread"]
+omit = ["tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
