@@ -1,0 +1,149 @@
+digraph G {
+  rankdir=TB;
+  fontsize=12
+
+  edge [
+    fontsize=12,
+    fontname="Inconsolata",
+  ];
+
+  node [
+    fontsize=12,
+    fontname="Inconsolata"
+    style=filled,
+    shape=box,
+  ];
+
+  node [
+    fillcolor=lightgray,
+  ];
+
+  ChooseAction [label="PLAYER chooses action\nMUST COUP if player has 10+ coins"];
+
+  Challenge [label="Opponent(s) can\nChallenge"];
+  ChallengeResolve [label="Resolve"];
+
+  Block [label="Block"];
+
+  BlockChallenge [label="Challenge Block"];
+  BlockChallengeResolve [label="Resolve"];
+
+  ActionResolve [label="Resolve"];
+
+  node [
+    style=filled,
+    fillcolor=lightyellow,
+  ];
+
+  Assassinate [label="Assassinate <TARGET>\n(Assassin)"]
+  Coup [label="Coup <TARGET>"]
+  Exchange [label="Exchange\n(Ambassador)"]
+  ForeignAid [label="Foreign Aid"]
+  Steal [label="Steal <TARGET>\n(Captain)"]
+  Tax [label="Tax\n(Duke)"]
+
+  ChallengePass [label="Pass"]
+  ChallengeCall [label="Call"]
+
+  BlockPass [label="Block Pass"]
+  BlockCall [label="Block with <CARD>"]
+
+  BlockChallengeCall [label="Call"]
+
+  node [
+    fillcolor=orange,
+    style=filled,
+  ];
+
+  BlockChallengePass [label="Pass"]
+
+  Income [label="Income"]
+
+  LoseCard [label="Lose <CARD>"]
+
+  ChallengeLoseCard [label="Lose <CARD>"]
+
+  BlockChallengeLoseCard [label="Lose <CARD>"]
+
+  node [
+    fillcolor=lightblue,
+    style="filled,rounded",
+  ];
+
+  DecisionActionTargeted [label="Targeted Action?"]
+  DecisionChallengeLoop [label="Loop over opponents"]
+  DecisionBlockLoop [label="Loop over players\nif action is Foreign Aid"]
+  DecisionBlockChallengeLoop [label="Loop over players"]
+
+  ChooseAction -> Assassinate [label=" coins >= 3"];
+  ChooseAction -> Coup [label="coins >= 7"];
+  ChooseAction -> Exchange;
+  ChooseAction -> ForeignAid;
+  ChooseAction -> Income;
+  ChooseAction -> Steal[label="coins(<TARGET>) > 0"];
+  ChooseAction -> Tax;
+
+  Assassinate -> Challenge;
+  Exchange -> Challenge;
+  Steal -> Challenge;
+  Tax -> Challenge;
+
+  Coup -> ActionResolve;
+
+  ForeignAid -> Block;
+
+  Challenge -> ChallengePass;
+  Challenge -> ChallengeCall;
+
+  ChallengePass -> DecisionChallengeLoop;
+  DecisionChallengeLoop -> Challenge [label=" next"];
+  DecisionChallengeLoop -> DecisionActionTargeted [label="all passed"];
+
+  DecisionActionTargeted -> ActionResolve [label=" no"];
+  DecisionActionTargeted -> Block [label="yes\n(<TARGET> can block)"];
+
+  ChallengeCall -> ChallengeResolve;
+
+  ChallengeResolve -> ChallengeLoseCard;
+
+  ChallengeLoseCard -> DecisionActionTargeted;
+
+  Block -> BlockPass;
+  Block -> BlockCall;
+
+  BlockPass -> DecisionBlockLoop;
+  DecisionBlockLoop -> Block;
+  DecisionBlockLoop -> ActionResolve;
+
+  BlockCall -> BlockChallenge;
+  BlockChallenge -> BlockChallengePass;
+  BlockChallenge -> BlockChallengeCall;
+
+  BlockChallengePass -> DecisionBlockChallengeLoop;
+  DecisionBlockChallengeLoop -> BlockChallenge;
+
+  BlockChallengeCall -> BlockChallengeResolve;
+
+  BlockChallengeResolve -> BlockChallengeLoseCard;
+  BlockChallengeLoseCard -> ActionResolve;
+
+  ActionResolve -> LoseCard;
+
+  subgraph cluster_legend {
+    label = "Legend";
+
+    node [
+      fontsize=11
+    ];
+
+    A [label="State", shape=box, style=filled, fillcolor=lightgray];
+    B [label="Action", shape=box, style=filled, fillcolor=lightyellow];
+    C [label="(Possibly)\nTerminal\nAction", shape=box, style=filled, fillcolor=orange];
+    D [label="Conditional/\nLooping\nnode", shape=box, style="filled,rounded", fillcolor=lightblue];
+    A -> B -> C -> D [style=invis];
+  }
+
+  Fake [label="", shape=box, style=invis];
+  Income -> Fake [style=invis];
+  Fake -> A [style=invis];
+}
