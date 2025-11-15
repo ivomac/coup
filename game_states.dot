@@ -1,5 +1,5 @@
 digraph G {
-  rankdir=TB;
+  rankdir=LR;
   fontsize=12
 
   edge [
@@ -20,9 +20,6 @@ digraph G {
 
   ChooseAction [label="PLAYER chooses action\nMUST COUP if player has 10+ coins"];
 
-  Challenge [label="Opponent(s) can\nChallenge"];
-  ChallengeResolve [label="Resolve"];
-
   Block [label="Block"];
 
   BlockChallenge [label="Challenge Block"];
@@ -42,9 +39,6 @@ digraph G {
   Steal [label="Steal <TARGET>\n(Captain)"]
   Tax [label="Tax\n(Duke)"]
 
-  ChallengePass [label="Pass"]
-  ChallengeCall [label="Call"]
-
   BlockPass [label="Block Pass"]
   BlockCall [label="Block with <CARD>"]
 
@@ -60,8 +54,6 @@ digraph G {
   Income [label="Income"]
 
   LoseCard [label="Lose <CARD>"]
-
-  ChallengeLoseCard [label="Lose <CARD>"]
 
   BlockChallengeLoseCard [label="Lose <CARD>"]
 
@@ -82,6 +74,23 @@ digraph G {
   ChooseAction -> Income;
   ChooseAction -> Steal[label="coins(<TARGET>) > 0"];
   ChooseAction -> Tax;
+
+  subgraph cluster_challenge {
+    label = "Opponent(s) can Challenge";
+    shape = "box";
+    style = "rounded";
+
+    node [
+      fontsize=11
+    ];
+
+    Challenge [label="Opponent(s) can\nChallenge", fillcolor=lightgray];
+    ChallengeResolve [label="Resolve", fillcolor=lightgray];
+
+    ChallengePass [label="Pass", style=filled, fillcolor=lightyellow];
+    ChallengeCall [label="Call", style=filled, fillcolor=lightyellow];
+    ChallengeLoseCard [label="Lose <CARD>", fillcolor=orange, style=filled]
+  }
 
   Assassinate -> Challenge;
   Exchange -> Challenge;
