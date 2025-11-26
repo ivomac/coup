@@ -1,0 +1,233 @@
+digraph G {
+  rankdir=TB;
+  fontsize=12
+
+  edge [
+    fontsize=12,
+    fontname="Inconsolata",
+  ];
+
+  node [
+    fontsize=12,
+    fontname="Inconsolata"
+    style="filled,rounded",
+    shape=box,
+  ];
+
+  node [
+    fillcolor=lightgray,
+  ];
+
+  ChooseAction [label="<ACTOR> chooses action\n(MUST COUP if <ACTOR> has 10+ coins)"];
+
+  Challenge [label="OPPONENT of <ACTOR>\nmay challenge"];
+  ChallengeResolveActor [label="<ACTOR> chooses\ncard to lose"];
+  ChallengeResolveChallenger [label="<CHALLENGER> chooses\ncard to lose"];
+
+  ForeignAidBlock [label="OPPONENT of <ACTOR>\nmay block"];
+  Block [label="<TARGET>\nmay block"];
+
+  BlockChallenge [label="OPPONENT of <BLOCKER>\nmay challenge"];
+  BlockChallengeResolveBlocker [label="<BLOCKER> chooses\ncard to lose"];
+  BlockChallengeResolveChallenger [label="<CHALLENGER> chooses\ncard to lose"];
+
+  AssassinateResolve [label="<TARGET> chooses\ncard to lose"];
+
+  ExchangeResolve [label="<ACTOR> chooses\ncard to return"];
+  ExchangeTwoResolve [label="<ACTOR> chooses\ncard to return"];
+
+  CoupResolve [label="<TARGET> chooses\ncard to lose"];
+
+  node [
+    style=filled,
+    fillcolor=lightyellow,
+  ];
+
+  Assassinate [label="Assassinate <TARGET>\n(Assassin)"]
+  Coup [label="Coup <TARGET>"]
+  Exchange [label="Exchange\n(Ambassador)"]
+  ForeignAid [label="Foreign Aid"]
+  Income [label="Income"]
+  Steal [label="Steal <TARGET>\n(Captain)"]
+  Tax [label="Tax\n(Duke)"]
+
+  ChallengePass [label="Pass"]
+  ChallengeCall [label="Challenge"]
+
+  ForeignAidBlockPass [label="Block Pass"]
+  ForeignAidBlockCall [label="Block with Duke"]
+
+  BlockPass [label="Block Pass"]
+  BlockCall [label="Block with <CARD>"]
+
+  BlockChallengePass [label="Pass"]
+  BlockChallengeCall [label="Challenge"]
+
+  CoupLoseCard [label="Lose <CARD>"]
+  ExchangeLoseCard [label="Lose <CARD>"]
+  ExchangeTwoLoseCard [label="Lose <CARD>"]
+  AssassinateLoseCard [label="Lose <CARD>"]
+
+  ChallengeLoseCardActor [label="Lose <CARD>"]
+  ChallengeLoseCardChallenger [label="Lose <CARD>"]
+
+  BlockChallengeLoseCardBlocker [label="Lose <CARD>"]
+  BlockChallengeLoseCardChallenger [label="Lose <CARD>"]
+
+  node [
+    fillcolor=orange,
+    style="filled,rounded",
+  ];
+
+  EndBlock [label="End"]
+  EndForeignAidBlock [label="End"]
+
+  EndChallenge [label="End"]
+  EndBlockChallenge [label="End"]
+
+  EndTargetDead [label="End"]
+  EndAssassinateTargetDead [label="End"]
+
+  EndAssassinate [label="End"]
+  EndAssassinate [label="End"]
+  EndCoup [label="End"]
+  EndExchange [label="End"]
+  EndIncome [label="End"]
+  EndSteal [label="End"]
+  EndTax [label="End"]
+
+  node [
+    fillcolor=lightgreen,
+    style="filled,diagonals",
+  ];
+
+  DecisionAction [label="Action is..."]
+  DecisionAssassinate [label="Action is..."]
+
+  DecisionActionIsBluff [label="Action is bluff?"]
+  DecisionBlockIsBluff [label="Block is bluff?"]
+
+  DecisionTargetAlive [label="<TARGET> is alive?"]
+  DecisionAssassinateTargetAlive [label="<TARGET> is alive?"]
+
+  node [
+    fillcolor=lightblue,
+    style="filled,diagonals",
+  ];
+
+  DecisionChallengeLoop [label="OPPONENTS of <ACTOR>\nmay challenge"]
+  DecisionForeignAidBlockLoop [label="OPPONENTS of <ACTOR>\nmay block"]
+  DecisionBlockChallengeLoop [label="OPPONENTS of <BLOCKER>\nmay challenge "]
+
+  ChooseAction -> Assassinate [label=" coins >= 3"];
+  ChooseAction -> Coup [label="coins >= 7"];
+  ChooseAction -> Exchange;
+  ChooseAction -> ForeignAid;
+  ChooseAction -> Income;
+  ChooseAction -> Steal [label="coins(<TARGET>) > 0"];
+  ChooseAction -> Tax;
+
+  Income -> EndIncome;
+  Assassinate -> DecisionChallengeLoop;
+  Exchange -> DecisionChallengeLoop;
+  Steal -> DecisionChallengeLoop;
+  Tax -> DecisionChallengeLoop;
+
+  DecisionChallengeLoop -> Challenge;
+
+  Coup -> CoupResolve;
+  CoupResolve -> CoupLoseCard;
+  CoupLoseCard -> EndCoup;
+
+  ForeignAid -> DecisionForeignAidBlockLoop;
+
+  Challenge -> ChallengePass;
+  Challenge -> ChallengeCall;
+
+  ChallengePass -> DecisionChallengeLoop;
+  DecisionChallengeLoop -> DecisionAction [label="No\n <CHALLENGER>"];
+
+  DecisionAction -> ExchangeResolve [label=" Exchange"];
+  DecisionAction -> EndTax [label=" Tax"];
+  DecisionAction -> DecisionTargetAlive [label=" Assassinate\nOR Steal"];
+
+  DecisionTargetAlive -> Block [label=" True"];
+  DecisionTargetAlive -> EndTargetDead [label=" False"];
+
+  ChallengeCall -> DecisionActionIsBluff;
+  DecisionActionIsBluff -> ChallengeResolveActor [label=" True"];
+  DecisionActionIsBluff -> ChallengeResolveChallenger [label=" False"];
+
+  ChallengeResolveActor -> ChallengeLoseCardActor;
+  ChallengeResolveChallenger -> ChallengeLoseCardChallenger;
+
+  ChallengeLoseCardActor -> EndChallenge;
+  ChallengeLoseCardChallenger -> DecisionAction;
+
+  Block -> BlockPass;
+  Block -> BlockCall;
+
+  BlockPass -> DecisionAssassinate [label=" No\n <BLOCKER>"];
+
+  ForeignAidBlockPass -> DecisionForeignAidBlockLoop;
+
+  DecisionForeignAidBlockLoop -> ForeignAidBlock;
+  DecisionForeignAidBlockLoop -> EndForeignAidBlock [label=" No <BLOCKER>"];
+
+  ForeignAidBlock -> ForeignAidBlockPass;
+  ForeignAidBlock -> ForeignAidBlockCall;
+
+  BlockCall -> DecisionBlockChallengeLoop;
+  ForeignAidBlockCall -> DecisionBlockChallengeLoop;
+
+  BlockChallenge -> BlockChallengePass;
+  BlockChallenge -> BlockChallengeCall;
+
+  BlockChallengePass -> DecisionBlockChallengeLoop;
+  DecisionBlockChallengeLoop -> BlockChallenge;
+
+  DecisionBlockChallengeLoop -> EndBlock [label=" No <BLOCK_CHALLENGER>"];
+
+  BlockChallengeCall -> DecisionBlockIsBluff;
+
+  DecisionBlockIsBluff -> BlockChallengeResolveBlocker [label=" True"];
+  DecisionBlockIsBluff -> BlockChallengeResolveChallenger [label=" False"];
+
+  BlockChallengeResolveChallenger -> BlockChallengeLoseCardChallenger;
+  BlockChallengeResolveBlocker -> BlockChallengeLoseCardBlocker;
+
+  BlockChallengeLoseCardChallenger -> EndBlockChallenge;
+  BlockChallengeLoseCardBlocker -> DecisionAssassinate;
+
+  DecisionAssassinate -> DecisionAssassinateTargetAlive [label=" Assassinate"];
+  DecisionAssassinate -> EndSteal [label=" Foreign Aid\nOR Steal"];
+
+  DecisionAssassinateTargetAlive -> AssassinateResolve [label=" True"];
+  DecisionAssassinateTargetAlive -> EndAssassinateTargetDead [label=" False"];
+
+  AssassinateResolve -> AssassinateLoseCard;
+  ExchangeResolve -> ExchangeLoseCard;
+  ExchangeLoseCard -> ExchangeTwoResolve;
+  ExchangeTwoResolve -> ExchangeTwoLoseCard;
+  ExchangeTwoLoseCard -> EndExchange;
+
+  AssassinateLoseCard -> EndAssassinate;
+
+  subgraph cluster_legend {
+    label = "Legend";
+
+    node [
+      fontsize=11
+    ];
+
+    A [label="State", shape=box, style="filled,rounded", fillcolor=lightgray];
+    B [label="End\nState", shape=box, style="filled,rounded", fillcolor=orange];
+    C [label="Action", shape=box, style=filled, fillcolor=lightyellow];
+    D [label="Conditional\nNode", shape=box, style="filled,diagonals", fillcolor=lightgreen];
+    E [label="Loop\nNode", shape=box, style="filled,diagonals", fillcolor=lightblue];
+    A -> B -> C -> D -> E [style=invis];
+  }
+
+  Fake [label="", shape=box, style=invis];
+  EndCoup -> Fake -> A [style=invis];
+}
