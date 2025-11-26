@@ -11,8 +11,6 @@ for agent in env.agent_iter():
 
     # info also contains past turn observations in info["observation_history"]
 
-    action: int | None
-
     if termination or truncation:
         action = None
     else:

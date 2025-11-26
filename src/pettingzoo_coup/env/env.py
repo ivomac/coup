@@ -128,11 +128,11 @@ class raw_env(AECEnv):
         """Return the current agent whose turn it is."""
         return self.turn.player.id
 
-    def observation_space(self, agent):
+    def observation_space(self, agent) -> spaces.Box:
         """Return the observation space for the given agent."""
         return self.observation_spaces[agent]
 
-    def action_space(self, agent):
+    def action_space(self, agent) -> spaces.Discrete:
         """Return the action space for the given agent."""
         return self.action_spaces[agent]
 
