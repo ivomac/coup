@@ -1,5 +1,7 @@
 """PettingZoo environment implementation of the card game Coup."""
 
+from __future__ import annotations
+
 import logging
 from collections import Counter
 from dataclasses import replace
@@ -8,8 +10,8 @@ import numpy as np
 from gymnasium import spaces
 from pettingzoo import AECEnv
 
-import pettingzoo_coup.env.action as Action
-import pettingzoo_coup.env.state as State
+from pettingzoo_coup.env import action, state
+from pettingzoo_coup.env.action import ActionSpace
 from pettingzoo_coup.env.card import CARD, draw
 from pettingzoo_coup.env.player import AgentID, Player
 from pettingzoo_coup.env.tabulate import to_markdown
@@ -86,7 +88,7 @@ class raw_env(AECEnv):
         ### GAME STATE ###
 
         self.n_turn: int
-        self.turn: State.Any
+        self.turn: state.Any
 
         self.rewards: dict[AgentID, float]
         self._cumulative_rewards: dict[AgentID, float]
@@ -97,7 +99,7 @@ class raw_env(AECEnv):
 
         ### OBSERVATION SPACE ###
 
-        obs_parts = State.observation_space(
+        obs_parts = state.observation_space(
             num_players=len(self.possible_agents),
             max_card_count=max(self.base_deck.values()),
         )
@@ -116,7 +118,9 @@ class raw_env(AECEnv):
 
         ### ACTION SPACE ###
 
-        self.acts = Action.action_space(num_players=len(self.possible_agents))
+        self.acts: ActionSpace = action.action_space(
+            num_players=len(self.possible_agents)
+        )
 
         self.act_to_idx = {act: i for i, act in enumerate(self.acts)}
 
@@ -188,7 +192,7 @@ class raw_env(AECEnv):
         agent = self.agents[agent_idx]
 
         self.n_turn = 1
-        self.turn = State.Start(player=self.find_player(agent))
+        self.turn = state.Start(player=self.find_player(agent))
         logger.debug("Initial turn: %s", self.turn.player.id)
 
         self.rewards = dict.fromkeys(self.agents, 0.0)
@@ -222,10 +226,10 @@ class raw_env(AECEnv):
         obs += [unseen[card] for card in CARD]
         obs += [player.cards[card] for card in CARD]
         obs += [nxt.cards.total() for _, nxt in player.enum()]
-        obs += State.observe_act(getattr(turn, "act", None), player)
-        obs += State.observe_challenge(getattr(turn, "challenge", None), player)
-        obs += State.observe_block(getattr(turn, "block", None), player)
-        obs += State.observe_challenge(getattr(turn, "block_challenge", None), player)
+        obs += state.observe_act(getattr(turn, "act", None), player)
+        obs += state.observe_challenge(getattr(turn, "challenge", None), player)
+        obs += state.observe_block(getattr(turn, "block", None), player)
+        obs += state.observe_challenge(getattr(turn, "block_challenge", None), player)
 
         return np.array(obs, dtype=np.int8)
 
@@ -277,7 +281,7 @@ class raw_env(AECEnv):
         """Execute an action and transition to the next game state."""
 
         if action is None:
-            assert type(self.turn) is State.EndTurn
+            assert type(self.turn) is state.EndTurn
 
             agent = self.turn.player.id
 
@@ -326,7 +330,7 @@ class raw_env(AECEnv):
             self.turn = self.turn.step(action_obj, target)
             logger.debug("New turn state: %s", type(self.turn).__name__)
 
-        if type(self.turn) is State.EndTurn:
+        if type(self.turn) is state.EndTurn:
             # get longest observation_history
             if self.agents:
                 dct = max(
@@ -374,7 +378,7 @@ class raw_env(AECEnv):
                     self.turn.act.actor.next_alive.id,
                 )
                 self.n_turn += 1
-                self.turn = State.Start(player=self.turn.act.actor.next_alive)
+                self.turn = state.Start(player=self.turn.act.actor.next_alive)
                 return
 
             return

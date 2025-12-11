@@ -1,10 +1,19 @@
 """Game state transitions and state classes for the Coup game."""
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, replace
 from typing import Literal
 
-from pettingzoo_coup.env.action import ACT, ACTION, BLOCK_ACTION, START_ACTION, Action
+from pettingzoo_coup.env.action import (
+    ACT,
+    ACTION,
+    BLOCK_ACTION,
+    START_ACTION,
+    Action,
+    ActionMask,
+)
 from pettingzoo_coup.env.card import CARD
 from pettingzoo_coup.env.player import Player
 
@@ -15,9 +24,8 @@ class InvalidState(Exception):
     """Raised when an invalid state is reached for debugging purposes."""
 
 
-def lose_card_mask(player: Player) -> list[tuple[Action, int]]:
+def lose_card_mask(player: Player) -> ActionMask:
     """Generate valid card loss actions for a player."""
-
     actions = []
 
     for action in ACTION:
@@ -27,9 +35,8 @@ def lose_card_mask(player: Player) -> list[tuple[Action, int]]:
     return actions
 
 
-def block_mask(act: Action) -> list[tuple[Action, int]]:
+def block_mask(act: Action) -> ActionMask:
     """Generate valid block actions against the given action."""
-
     actions = []
 
     for action in ACTION:
@@ -39,9 +46,8 @@ def block_mask(act: Action) -> list[tuple[Action, int]]:
     return actions
 
 
-def challenge_mask() -> list[tuple[Action, int]]:
+def challenge_mask() -> ActionMask:
     """Generate valid challenge actions."""
-
     actions = []
 
     for action in ACTION:
@@ -60,7 +66,7 @@ class ActInfo:
     target: Player
 
 
-def observe_act(act: ActInfo | None, player: Player):
+def observe_act(act: ActInfo | None, player: Player) -> list[bool]:
     """Generate observation vector for an action."""
 
     if act:
@@ -106,7 +112,7 @@ class ChallengeInfo:
         return self.loser == self.challenger
 
 
-def observe_challenge(chl: ChallengeInfo | None, player: Player):
+def observe_challenge(chl: ChallengeInfo | None, player: Player) -> list[bool]:
     """Generate observation vector for a challenge."""
 
     if chl:
@@ -138,7 +144,7 @@ class BlockInfo:
     action: Action
 
 
-def observe_block(blk: BlockInfo | None, player: Player):
+def observe_block(blk: BlockInfo | None, player: Player) -> list[bool]:
     """Generate observation vector for a block."""
 
     if blk:
@@ -160,7 +166,7 @@ class Start:
 
     player: Player
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         actions = []
 
         player = self.player
@@ -185,7 +191,7 @@ class Start:
 
         return actions
 
-    def step(self, action: Action, target: Player) -> "Any":
+    def step(self, action: Action, target: Player) -> Any:
         act = ActInfo(actor=self.player, action=action, target=target)
 
         logger.debug(
@@ -246,10 +252,10 @@ class Challenge:
     player: Player
     act: ActInfo
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return challenge_mask()
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         player = self.player
         logger.debug("Challenge state: player=%s action=%s", player.id, action.name)
 
@@ -323,10 +329,10 @@ class ChallengeResolve:
     act: ActInfo
     challenge: ChallengeInfo
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return lose_card_mask(self.player)
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         card = action.card
         assert card
 
@@ -389,10 +395,10 @@ class ForeignAidBlock:
 
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return block_mask(self.act.action)
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         player = self.player
         logger.debug("ForeignAidBlock: player=%s action=%s", player.id, action.name)
 
@@ -435,10 +441,10 @@ class TargetBlock:
 
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return block_mask(self.act.action)
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         player = self.player
 
         logger.debug("TargetBlock: player=%s action=%s", player.id, action.name)
@@ -482,10 +488,10 @@ class BlockChallenge:
     act: ActInfo
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return challenge_mask()
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         player = self.player
 
         logger.debug("BlockChallenge: player=%s action=%s", player.id, action.name)
@@ -558,10 +564,10 @@ class BlockChallengeResolve:
     act: ActInfo
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return lose_card_mask(self.player)
 
-    def step(self, action: Action, *_) -> "Any":
+    def step(self, action: Action, *_) -> Any:
         card = action.card
         assert card
 
@@ -610,7 +616,8 @@ class BlockChallengeResolve:
 
         raise InvalidState("Action not handled for this state")
 
-    def toEndTurn(self) -> "EndTurn":
+    def toEndTurn(self) -> EndTurn:
+        """Create an EndTurn state with all current context."""
         return EndTurn(
             act=self.act,
             challenge=self.challenge,
@@ -631,10 +638,10 @@ class ActionResolve:
     block: BlockInfo | None = None
     block_challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return lose_card_mask(self.player)
 
-    def step(self, action: Action, *_) -> "EndTurn":
+    def step(self, action: Action, *_) -> EndTurn:
         card = action.card
         assert card
 
@@ -660,10 +667,10 @@ class ExchangeResolve:
     act: ActInfo
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return lose_card_mask(self.player)
 
-    def step(self, action: Action, *_) -> "ExchangeTwoResolve":
+    def step(self, action: Action, *_) -> ExchangeTwoResolve:
         card = action.card
         assert card
 
@@ -688,10 +695,10 @@ class ExchangeTwoResolve:
     act: ActInfo
     challenge: ChallengeInfo | None = None
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return lose_card_mask(self.player)
 
-    def step(self, action: Action, *_) -> "EndTurn":
+    def step(self, action: Action, *_) -> EndTurn:
         card = action.card
         assert card
 
@@ -724,10 +731,10 @@ class EndTurn:
             return self._player
         raise InvalidState("EndTurn is current state but no player specified")
 
-    def step(self, *_) -> "EndTurn":
+    def step(self, *_) -> EndTurn:
         raise NotImplementedError
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return []
 
 
@@ -739,10 +746,10 @@ class GameOver:
     def player(self):
         raise NotImplementedError
 
-    def step(self, *_) -> "GameOver":
+    def step(self, *_) -> GameOver:
         return self
 
-    def action_mask(self) -> list[tuple[Action, int]]:
+    def action_mask(self) -> ActionMask:
         return []
 
 

@@ -1,5 +1,7 @@
 """Action types and definitions."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -100,7 +102,13 @@ START_ACTION: list[Action] = [
 BLOCK_ACTION: list[Action] = [action for action in ACTION if action.type == ACT.BLOCK]
 
 
-def action_space(num_players: int) -> list[tuple[Action, int]]:
+ActionTarget = tuple[Action, int]
+ActionMask = list[ActionTarget]
+ActionSpace = list[ActionTarget]
+
+
+def action_space(num_players: int) -> ActionSpace:
+    """Generate the full action space for a game with the given number of players."""
     acts = []
 
     for action in ACTION:
